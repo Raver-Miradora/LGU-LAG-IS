@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Uploads & generated files
+server/uploads/photos/*
+server/uploads/documents/*
+server/uploads/generated/*
+!server/uploads/**/.gitkeep
+
+# Backups
+server/backups/*
+!server/backups/.gitkeep
+
+# Database
+*.db
+
+# Coverage
+coverage/
+
+# Misc
+*.tsbuildinfo

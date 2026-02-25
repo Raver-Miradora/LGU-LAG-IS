@@ -1,0 +1,318 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── ENUMS ──────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  HR_ADMIN
+  HR_STAFF
+  PESO_ADMIN
+  PESO_STAFF
+  VIEWER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum EmploymentStatus {
+  PERMANENT
+  CASUAL
+  COTERMINOUS
+  JOB_ORDER
+  CONTRACT_OF_SERVICE
+  TEMPORARY
+  ELECTED
+}
+
+enum ProgramStatus {
+  ACTIVE
+  COMPLETED
+  TERMINATED
+  GRADUATED
+  ON_HOLD
+}
+
+enum LivelihoodProgramType {
+  SKILLS_TRAINING
+  STARTER_KIT
+  SEED_CAPITAL
+  CASH_ASSISTANCE
+  MICRO_ENTERPRISE
+}
+
+enum LivelihoodStatus {
+  APPLIED
+  APPROVED
+  DISBURSED
+  MONITORING
+  COMPLETED
+  TERMINATED
+}
+
+// ─── USERS (Auth) ───────────────────────────────────
+
+model User {
+  id           String     @id @default(uuid())
+  username     String     @unique
+  passwordHash String     @map("password_hash")
+  fullName     String     @map("full_name")
+  role         Role       @default(VIEWER)
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+// ─── HR MODULE ──────────────────────────────────────
+
+model Employee {
+  id               String           @id @default(uuid())
+  employeeNo       String           @unique @map("employee_no")
+  firstName        String           @map("first_name")
+  middleName       String?          @map("middle_name")
+  lastName         String           @map("last_name")
+  suffix           String?
+  birthdate        DateTime
+  gender           Gender
+  civilStatus      String           @map("civil_status")
+  address          String
+  contactNo        String?          @map("contact_no")
+  email            String?
+  position         String
+  department       String
+  salaryGrade      Int?             @map("salary_grade")
+  stepIncrement    Int?             @map("step_increment")
+  employmentStatus EmploymentStatus @map("employment_status")
+  dateHired        DateTime         @map("date_hired")
+  photoUrl         String?          @map("photo_url")
+  bloodType        String?          @map("blood_type")
+  emergencyContact String?          @map("emergency_contact")
+  emergencyPhone   String?          @map("emergency_phone")
+  educationBg      Json?            @map("education_bg")
+  eligibility      Json?
+  isActive         Boolean          @default(true) @map("is_active")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  serviceRecords ServiceRecord[]
+  documents      EmployeeDocument[]
+  idCards        IdCard[]
+
+  @@map("employees")
+}
+
+model ServiceRecord {
+  id              String    @id @default(uuid())
+  employeeId      String    @map("employee_id")
+  dateFrom        DateTime  @map("date_from")
+  dateTo          DateTime? @map("date_to")
+  designation     String
+  status          String
+  salary          Decimal   @db.Decimal(12, 2)
+  office          String
+  branch          String?
+  lwop            String?
+  separationDate  DateTime? @map("separation_date")
+  separationCause String?   @map("separation_cause")
+  referenceNo     String?   @map("reference_no")
+  remarks         String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("service_records")
+}
+
+model EmployeeDocument {
+  id          String   @id @default(uuid())
+  employeeId  String   @map("employee_id")
+  fileName    String   @map("file_name")
+  filePath    String   @map("file_path")
+  fileType    String   @map("file_type")
+  fileSize    Int      @map("file_size")
+  description String?
+  uploadedAt  DateTime @default(now()) @map("uploaded_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_documents")
+}
+
+model IdCard {
+  id         String   @id @default(uuid())
+  employeeId String   @map("employee_id")
+  idNumber   String   @unique @map("id_number")
+  issuedDate DateTime @map("issued_date")
+  expiryDate DateTime @map("expiry_date")
+  qrData     String   @map("qr_data")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("id_cards")
+}
+
+// ─── PESO MODULE ────────────────────────────────────
+
+model Beneficiary {
+  id             String   @id @default(uuid())
+  firstName      String   @map("first_name")
+  middleName     String?  @map("middle_name")
+  lastName       String   @map("last_name")
+  suffix         String?
+  birthdate      DateTime
+  gender         Gender
+  civilStatus    String   @map("civil_status")
+  address        String
+  barangay       String
+  contactNo      String?  @map("contact_no")
+  email          String?
+  educationLevel String?  @map("education_level")
+  school         String?
+  course         String?
+  skills         String[] @default([])
+  photoUrl       String?  @map("photo_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  spesEnrollments       SpesEnrollment[]
+  ojtEnrollments        OjtEnrollment[]
+  tupadEnrollments      TupadEnrollment[]
+  livelihoodEnrollments LivelihoodEnrollment[]
+
+  @@map("beneficiaries")
+}
+
+model SpesEnrollment {
+  id                String        @id @default(uuid())
+  beneficiaryId     String        @map("beneficiary_id")
+  school            String
+  yearLevel         String        @map("year_level")
+  assignedAgency    String        @map("assigned_agency")
+  periodFrom        DateTime      @map("period_from")
+  periodTo          DateTime      @map("period_to")
+  dailyRate         Decimal       @map("daily_rate") @db.Decimal(10, 2)
+  totalDays         Int           @map("total_days")
+  totalCompensation Decimal       @map("total_compensation") @db.Decimal(12, 2)
+  govtShare         Decimal?      @map("govt_share") @db.Decimal(12, 2)
+  employerShare     Decimal?      @map("employer_share") @db.Decimal(12, 2)
+  status            ProgramStatus @default(ACTIVE)
+  batchYear         Int           @map("batch_year")
+  remarks           String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+
+  @@map("spes_enrollments")
+}
+
+model OjtEnrollment {
+  id                String        @id @default(uuid())
+  beneficiaryId     String        @map("beneficiary_id")
+  school            String
+  course            String
+  hostCompany       String        @map("host_company")
+  periodFrom        DateTime      @map("period_from")
+  periodTo          DateTime      @map("period_to")
+  requiredHours     Int           @map("required_hours")
+  renderedHours     Int?          @map("rendered_hours")
+  supervisorName    String?       @map("supervisor_name")
+  supervisorContact String?       @map("supervisor_contact")
+  status            ProgramStatus @default(ACTIVE)
+  evaluationRating  String?       @map("evaluation_rating")
+  remarks           String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+
+  @@map("ojt_enrollments")
+}
+
+model TupadEnrollment {
+  id             String        @id @default(uuid())
+  beneficiaryId  String        @map("beneficiary_id")
+  projectName    String        @map("project_name")
+  workType       String        @map("work_type")
+  barangay       String
+  periodFrom     DateTime      @map("period_from")
+  periodTo       DateTime      @map("period_to")
+  totalDays      Int           @map("total_days")
+  dailyWage      Decimal       @map("daily_wage") @db.Decimal(10, 2)
+  totalWage      Decimal       @map("total_wage") @db.Decimal(12, 2)
+  skillsCategory String?       @map("skills_category")
+  batchNo        String?       @map("batch_no")
+  status         ProgramStatus @default(ACTIVE)
+  remarks        String?
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+
+  @@map("tupad_enrollments")
+}
+
+model LivelihoodEnrollment {
+  id              String                @id @default(uuid())
+  beneficiaryId   String                @map("beneficiary_id")
+  programType     LivelihoodProgramType @map("program_type")
+  assistanceType  String?               @map("assistance_type")
+  amount          Decimal?              @db.Decimal(12, 2)
+  businessType    String?               @map("business_type")
+  businessName    String?               @map("business_name")
+  status          LivelihoodStatus      @default(APPLIED)
+  approvedDate    DateTime?             @map("approved_date")
+  disbursedDate   DateTime?             @map("disbursed_date")
+  monitoringNotes String?               @map("monitoring_notes")
+  remarks         String?
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  beneficiary Beneficiary @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+
+  @@map("livelihood_enrollments")
+}
+
+// ─── SYSTEM ─────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  timestamp  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
