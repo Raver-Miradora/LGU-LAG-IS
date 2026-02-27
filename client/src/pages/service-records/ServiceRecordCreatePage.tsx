@@ -48,7 +48,10 @@ export default function ServiceRecordCreatePage() {
   const onSubmit = async (data: ServiceRecordForm) => {
     setLoading(true);
     try {
-      await apiPost("/service-records", data);
+      const url = employeeId
+        ? `/employees/${employeeId}/service-records`
+        : "/service-records";
+      await apiPost(url, data);
       toast.success("Service record created");
       navigate(employeeId ? `/employees/${employeeId}` : "/service-records");
     } catch (err: any) {
@@ -81,6 +84,7 @@ export default function ServiceRecordCreatePage() {
                 label="Employee ID"
                 error={errors.employeeId?.message}
                 {...register("employeeId", { required: "Required" })}
+                readOnly={Boolean(employeeId)}
               />
               <Input
                 id="fromDate"

@@ -62,6 +62,23 @@ router.get(
   }
 );
 
+router.get(
+  "/documents/:docId/download",
+  authenticate,
+  authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "VIEWER"),
+  async (req, res, next) => {
+    try {
+      const docId = (Array.isArray(req.params.docId) ? req.params.docId[0] : req.params.docId) as string;
+      const doc = await prisma.employeeDocument.findUnique({ where: { id: docId } });
+      if (!doc) return res.status(404).json({ message: "Document not found" });
+      const diskPath = path.join(uploadDir, path.basename(doc.filePath));
+      res.download(diskPath, doc.fileName);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.delete(
   "/documents/:docId",
   authenticate,

@@ -25,6 +25,13 @@ export default function EmployeeViewPage() {
     enabled: !!id,
   });
 
+  // attached documents for this employee
+  const { data: docs, isLoading: docsLoading } = useQuery<any[]>({
+    queryKey: ["employee-docs", id],
+    queryFn: () => apiGet(`/employees/${id}/documents`),
+    enabled: !!id,
+  });
+
   const openBlob = async (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -38,6 +45,11 @@ export default function EmployeeViewPage() {
     if (!employee) return;
     const blob = await apiGetBlob(`/service-records/${employee.id}/pdf`);
     openBlob(blob, `service-records-${employee.employeeNo}.pdf`);
+  };
+
+  const handleDocDownload = async (docId: string, fileName: string) => {
+    const blob = await apiGetBlob(`/documents/${docId}/download`);
+    openBlob(blob, fileName);
   };
 
   const handleId = async () => {
@@ -56,13 +68,26 @@ export default function EmployeeViewPage() {
           <Button variant="ghost" size="sm" onClick={() => navigate("/employees")}> 
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {employee?.lastName}, {employee?.firstName} {employee?.middleName ?? ""}
-            </h1>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              {employee?.employeeNo} &middot; {employee?.position}
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+              {employee?.photoUrl ? (
+                <img
+                  src={employee.photoUrl}
+                  alt="Employee photo"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-xs text-gray-400">No photo</span>
+              )}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {employee?.lastName}, {employee?.firstName} {employee?.middleName ?? ""}
+              </h1>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                {employee?.employeeNo} &middot; {employee?.position}
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
@@ -93,6 +118,35 @@ export default function EmployeeViewPage() {
                 <p><strong>Email:</strong> {employee.email || '-'}</p>
                 <p className="sm:col-span-2"><strong>Address:</strong> {employee.address}</p>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Documents list */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {docsLoading ? (
+                <PageLoader />
+              ) : docs && docs.length > 0 ? (
+                <ul className="space-y-2">
+                  {docs.map((d: any) => (
+                    <li key={d.id} className="flex items-center justify-between">
+                      <span>{d.fileName}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDocDownload(d.id, d.fileName)}
+                      >
+                        Download
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--muted-foreground)]">No documents uploaded</p>
+              )}
             </CardContent>
           </Card>
 

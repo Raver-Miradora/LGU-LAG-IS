@@ -249,3 +249,13 @@ export interface PESODashboardStats {
   };
   topBarangays: { barangay: string; count: number }[];
 }
+
+// aggregated stats returned by HR dashboard endpoint (includes PESO metrics)
+export interface CombinedDashboardStats extends HRDashboardStats {
+  totalServiceRecords: number;
+  totalBeneficiaries?: number;
+  // numeric sum of all active programs across PESO categories
+  activePrograms?: number;
+  // optional breakdown imported from PESODashboardStats
+  activeProgramsByType?: PESODashboardStats["activePrograms"];
+}

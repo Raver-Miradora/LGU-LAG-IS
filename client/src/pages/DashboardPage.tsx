@@ -8,14 +8,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { PageLoader } from "@/components/ui/Spinner";
 import { apiGet } from "@/lib/api";
-import type { HRDashboardStats } from "@/types";
+import type { CombinedDashboardStats } from "@/types";
 
 // combine HR and additional metrics used in cards
-interface DashboardStats extends HRDashboardStats {
-  totalServiceRecords?: number;
-  totalBeneficiaries?: number;
-  activePrograms?: number;
-}
+// alias to shorter name for clarity
+type DashboardStats = CombinedDashboardStats;
 
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({

@@ -55,6 +55,11 @@ export default function EmployeeCreatePage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
+  // document upload
+  const docInput = useRef<HTMLInputElement>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docName, setDocName] = useState<string | null>(null);
+
   const onSubmit = async (data: EmployeeForm) => {
     setLoading(true);
     try {
@@ -65,6 +70,12 @@ export default function EmployeeCreatePage() {
         const formData = new FormData();
         formData.append("photo", photoFile);
         await apiPost(`/employees/${employee.id}/photo`, formData);
+      }
+      // 3. Upload document if selected
+      if (docFile) {
+        const formData = new FormData();
+        formData.append("document", docFile);
+        await apiPost(`/employees/${employee.id}/documents`, formData);
       }
       toast.success("Employee created successfully");
       navigate("/employees");
@@ -122,6 +133,30 @@ export default function EmployeeCreatePage() {
                 </div>
                 {photoFile && (
                   <button type="button" className="text-xs text-red-500" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}>Remove</button>
+                )}
+              </div>
+              {/* Document upload */}
+              <div className="col-span-2 flex flex-col items-start gap-1">
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  ref={docInput}
+                  style={{ display: "none" }}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    setDocFile(file || null);
+                    setDocName(file?.name || null);
+                  }}
+                />
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 underline"
+                  onClick={() => docInput.current?.click()}
+                >
+                  {docName || "Attach document (PDF/image)"}
+                </button>
+                {docFile && (
+                  <button type="button" className="text-xs text-red-500" onClick={() => { setDocFile(null); setDocName(null); }}>Remove</button>
                 )}
               </div>
               {/* ...existing code for other fields... */}

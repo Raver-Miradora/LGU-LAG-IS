@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { employeeService } from "./employee.service";
+import { beneficiaryService } from "../peso/beneficiary.service";
 
 export class EmployeeController {
   async findAll(req: Request, res: Response, next: NextFunction) {
@@ -56,8 +57,22 @@ export class EmployeeController {
 
   async getDashboardStats(_req: Request, res: Response, next: NextFunction) {
     try {
-      const stats = await employeeService.getDashboardStats();
-      res.json(stats);
+      const hrStats = await employeeService.getDashboardStats();
+      // enrich with peso stats if available
+      const pesoStats = await beneficiaryService.getDashboardStats();
+      // sum active programs across all types for a simple metric
+      const totalActivePrograms = Object.values(pesoStats.activePrograms).reduce(
+        (sum: number, n: number) => sum + n,
+        0
+      );
+      const combined = {
+        ...hrStats,
+        totalBeneficiaries: pesoStats.totalBeneficiaries,
+        activePrograms: totalActivePrograms,
+        // also include breakdown if the client wants it later
+        activeProgramsByType: pesoStats.activePrograms,
+      };
+      res.json(combined);
     } catch (error) {
       next(error);
     }

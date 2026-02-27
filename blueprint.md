@@ -1233,20 +1233,20 @@ Given that Philippine LGUs typically have local servers, the recommended deploym
 
 ### Phase 1: Foundation (Weeks 1–3)
 - [x] Requirements analysis and blueprint (this document)
-- [ ] Project setup: repo, folder structure, tooling (ESLint, Prettier, TypeScript)
-- [ ] Database schema design and Prisma setup
-- [ ] Authentication module (login, JWT, RBAC middleware)
-- [ ] User management CRUD
-- [ ] Base UI layout: sidebar, header, routing
+- [x] Project setup: repo, folder structure, tooling (ESLint, Prettier, TypeScript)
+- [x] Database schema design and Prisma setup
+- [x] Authentication module (login, JWT, RBAC middleware)
+- [x] User management CRUD
+- [x] Base UI layout: sidebar, header, routing
 
 ### Phase 2: HR Module (Weeks 4–7)
-- [ ] Employee CRUD (profile form, list, detail view)
-- [ ] Photo upload and management
-- [ ] Service record CRUD
-- [ ] Document upload/attachment
-- [ ] Service record PDF generation
-- [ ] LGU ID card generation + QR code
-- [ ] HR dashboard with statistics
+- [x] Employee CRUD (profile form, list, detail view)
+- [x] Photo upload and management
+- [x] Service record CRUD
+- [x] Document upload/attachment (with download support)
+- [x] Service record PDF generation
+- [x] LGU ID card generation + QR code
+- [x] HR dashboard with statistics
 
 ### Phase 3: PESO Module (Weeks 8–11)
 - [ ] Beneficiary registration CRUD

@@ -157,10 +157,13 @@ export class EmployeeService {
       }),
     ]);
 
+    const totalServiceRecords = await prisma.serviceRecord.count();
+
     return {
       totalEmployees,
       activeEmployees,
       inactiveEmployees: totalEmployees - activeEmployees,
+      totalServiceRecords,
       byDepartment: departmentCounts.map((d: any) => ({
         department: d.department,
         count: d._count,
