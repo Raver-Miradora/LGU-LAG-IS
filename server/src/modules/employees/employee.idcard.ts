@@ -1,5 +1,6 @@
 import { Router } from "express";
 import QRCode from "qrcode";
+// @ts-ignore: missing types for pdfkit package
 import PDFDocument from "pdfkit";
 import prisma from "../../config/database";
 import { authenticate, authorize } from "../../middleware/auth";

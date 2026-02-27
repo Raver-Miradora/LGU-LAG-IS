@@ -1,5 +1,4 @@
 import serviceRecordPdfRouter from "./service-record.pdf";
-router.use(serviceRecordPdfRouter);
 import { Router } from "express";
 import { serviceRecordController } from "./service-record.controller";
 import { authenticate, authorize } from "../../middleware/auth";
@@ -10,6 +9,9 @@ import {
 } from "./service-record.schema";
 
 const router = Router();
+
+// attach PDF sub-router
+router.use(serviceRecordPdfRouter);
 
 router.use(authenticate);
 

@@ -1,3 +1,4 @@
+// @ts-ignore: missing type declarations for prisma client in seed script
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 

@@ -20,7 +20,7 @@ export class EmployeeController {
 
   async findById(req: Request, res: Response, next: NextFunction) {
     try {
-      const employee = await employeeService.findById(req.params.id);
+      const employee = await employeeService.findById(req.params.id as string);
       res.json(employee);
     } catch (error) {
       next(error);
@@ -38,7 +38,7 @@ export class EmployeeController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const employee = await employeeService.update(req.params.id, req.body);
+      const employee = await employeeService.update(req.params.id as string, req.body);
       res.json(employee);
     } catch (error) {
       next(error);
@@ -47,7 +47,7 @@ export class EmployeeController {
 
   async archive(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await employeeService.archive(req.params.id);
+      const result = await employeeService.archive(req.params.id as string);
       res.json(result);
     } catch (error) {
       next(error);

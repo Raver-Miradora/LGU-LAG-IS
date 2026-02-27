@@ -8,7 +8,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { PageLoader } from "@/components/ui/Spinner";
 import { apiGet } from "@/lib/api";
-import type { DashboardStats } from "@/types";
+import type { HRDashboardStats } from "@/types";
+
+// combine HR and additional metrics used in cards
+interface DashboardStats extends HRDashboardStats {
+  totalServiceRecords?: number;
+  totalBeneficiaries?: number;
+  activePrograms?: number;
+}
 
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({

@@ -15,7 +15,7 @@ export class UserController {
 
   async findById(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.findById(req.params.id);
+      const user = await userService.findById(req.params.id as string);
       res.json(user);
     } catch (error) {
       next(error);
@@ -33,7 +33,7 @@ export class UserController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.update(req.params.id, req.body);
+      const user = await userService.update(req.params.id as string, req.body);
       res.json(user);
     } catch (error) {
       next(error);
@@ -42,7 +42,7 @@ export class UserController {
 
   async deactivate(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await userService.deactivate(req.params.id);
+      const result = await userService.deactivate(req.params.id as string);
       res.json(result);
     } catch (error) {
       next(error);
@@ -58,7 +58,7 @@ export class UserController {
           .json({ message: "Password must be at least 8 characters" });
         return;
       }
-      const result = await userService.resetPassword(req.params.id, newPassword);
+      const result = await userService.resetPassword(req.params.id as string, newPassword);
       res.json(result);
     } catch (error) {
       next(error);

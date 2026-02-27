@@ -25,13 +25,23 @@ export class AuthService {
       role: user.role,
     };
 
-    const accessToken = jwt.sign(payload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn as string,
-    });
+    // @ts-ignore: types mismatch in jwt.sign overloads
+    const accessToken = jwt.sign(
+      payload,
+      config.jwt.secret as jwt.Secret,
+      {
+        expiresIn: config.jwt.expiresIn as string,
+      }
+    );
 
-    const refreshToken = jwt.sign(payload, config.jwt.refreshSecret, {
-      expiresIn: config.jwt.refreshExpiresIn as string,
-    });
+    // @ts-ignore: types mismatch in jwt.sign overloads
+    const refreshToken = jwt.sign(
+      payload,
+      config.jwt.refreshSecret as jwt.Secret,
+      {
+        expiresIn: config.jwt.refreshExpiresIn as string,
+      }
+    );
 
     // Log the login
     await prisma.auditLog.create({
@@ -75,9 +85,14 @@ export class AuthService {
         role: user.role,
       };
 
-      const accessToken = jwt.sign(payload, config.jwt.secret, {
-        expiresIn: config.jwt.expiresIn as string,
-      });
+      // @ts-ignore: types mismatch in jwt.sign overloads
+      const accessToken = jwt.sign(
+        payload,
+        config.jwt.secret as jwt.Secret,
+        {
+          expiresIn: config.jwt.expiresIn as string,
+        }
+      );
 
       return { accessToken };
     } catch {

@@ -27,14 +27,16 @@ router.post(
     try {
       const employee = await prisma.employee.findUnique({ where: { id: req.params.id } });
       if (!employee) return res.status(404).json({ message: "Employee not found" });
-      const filePath = `/uploads/documents/${req.file.filename}`;
+      // multer guarantees file exists when this handler runs
+      const file = req.file!;
+      const filePath = `/uploads/documents/${file.filename}`;
       const doc = await prisma.employeeDocument.create({
         data: {
           employeeId: req.params.id,
-          fileName: req.file.originalname,
+          fileName: file.originalname,
           filePath,
-          fileType: req.file.mimetype,
-          fileSize: req.file.size,
+          fileType: file.mimetype,
+          fileSize: file.size,
         },
       });
       res.json(doc);

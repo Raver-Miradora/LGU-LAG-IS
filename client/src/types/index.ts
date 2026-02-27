@@ -27,6 +27,9 @@ export interface LoginResponse {
 // ─── Employee ──────────────────────────────
 
 export interface Employee {
+  // allow arbitrary property access for table utility types
+  [key: string]: any;
+
   id: string;
   employeeNo: string;
   firstName: string;

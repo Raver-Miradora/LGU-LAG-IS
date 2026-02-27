@@ -5,7 +5,7 @@ export class ServiceRecordController {
   async findByEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const records = await serviceRecordService.findByEmployee(
-        req.params.employeeId
+        (Array.isArray(req.params.employeeId) ? req.params.employeeId[0] : req.params.employeeId) as string
       );
       res.json(records);
     } catch (error) {
@@ -16,7 +16,7 @@ export class ServiceRecordController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const record = await serviceRecordService.create(
-        req.params.employeeId,
+        (Array.isArray(req.params.employeeId) ? req.params.employeeId[0] : req.params.employeeId) as string,
         req.body
       );
       res.status(201).json(record);
@@ -28,7 +28,7 @@ export class ServiceRecordController {
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const record = await serviceRecordService.update(
-        req.params.id,
+        (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string,
         req.body
       );
       res.json(record);
@@ -39,7 +39,7 @@ export class ServiceRecordController {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await serviceRecordService.delete(req.params.id);
+      const result = await serviceRecordService.delete((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string);
       res.json(result);
     } catch (error) {
       next(error);

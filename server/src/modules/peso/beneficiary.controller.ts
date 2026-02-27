@@ -19,7 +19,7 @@ export class BeneficiaryController {
 
   async findById(req: Request, res: Response, next: NextFunction) {
     try {
-      const beneficiary = await beneficiaryService.findById(req.params.id);
+      const beneficiary = await beneficiaryService.findById((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string);
       res.json(beneficiary);
     } catch (error) {
       next(error);
@@ -37,7 +37,7 @@ export class BeneficiaryController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const beneficiary = await beneficiaryService.update(req.params.id, req.body);
+      const beneficiary = await beneficiaryService.update((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string, req.body);
       res.json(beneficiary);
     } catch (error) {
       next(error);

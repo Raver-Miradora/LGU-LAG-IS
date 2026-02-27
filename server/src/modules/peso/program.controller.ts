@@ -25,7 +25,7 @@ export class ProgramController {
 
   async updateSpesStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await programService.updateSpesStatus(req.params.id, req.body.status);
+      const result = await programService.updateSpesStatus((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string, req.body.status);
       res.json(result);
     } catch (error) { next(error); }
   }
@@ -52,7 +52,7 @@ export class ProgramController {
 
   async updateOjtStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await programService.updateOjtStatus(req.params.id, req.body.status);
+      const result = await programService.updateOjtStatus((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string, req.body.status);
       res.json(result);
     } catch (error) { next(error); }
   }
@@ -80,7 +80,7 @@ export class ProgramController {
 
   async updateTupadStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await programService.updateTupadStatus(req.params.id, req.body.status);
+      const result = await programService.updateTupadStatus((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string, req.body.status);
       res.json(result);
     } catch (error) { next(error); }
   }
@@ -108,7 +108,7 @@ export class ProgramController {
 
   async updateLivelihoodStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await programService.updateLivelihoodStatus(req.params.id, req.body.status);
+      const result = await programService.updateLivelihoodStatus((Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string, req.body.status);
       res.json(result);
     } catch (error) { next(error); }
   }

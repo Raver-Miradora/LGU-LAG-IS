@@ -11,6 +11,14 @@ import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import type { Employee } from "@/types";
 
+// form payload excludes auto-generated and nested fields
+type EmployeeForm = Omit<
+  Employee,
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "_count"
+>;
 
 // Add photo upload to form
 
@@ -120,19 +128,19 @@ export default function EmployeeCreatePage() {
               <Input
                 id="employeeNo"
                 label="Employee No."
-                error={errors.employeeNo?.message}
+                error={errors.employeeNo?.message as string}
                 {...register("employeeNo", { required: "Required" })}
               />
               <Input
                 id="lastName"
                 label="Last Name"
-                error={errors.lastName?.message}
+                error={errors.lastName?.message as string}
                 {...register("lastName", { required: "Required" })}
               />
               <Input
                 id="firstName"
                 label="First Name"
-                error={errors.firstName?.message}
+                error={errors.firstName?.message as string}
                 {...register("firstName", { required: "Required" })}
               />
               <Input
@@ -141,23 +149,23 @@ export default function EmployeeCreatePage() {
                 {...register("middleName")}
               />
               <Input
-                id="extensionName"
+                id="suffix"
                 label="Extension (Jr., Sr., etc.)"
-                {...register("extensionName")}
+                {...register("suffix")}
               />
               <Input
-                id="dateOfBirth"
+                id="birthdate"
                 label="Date of Birth"
                 type="date"
-                error={errors.dateOfBirth?.message}
-                {...register("dateOfBirth", { required: "Required" })}
+                error={errors.birthdate?.message as string}
+                {...register("birthdate", { required: "Required" })}
               />
               <Select
                 id="gender"
                 label="Gender"
                 options={genderOptions}
                 placeholder="Select gender"
-                error={errors.gender?.message}
+                error={errors.gender?.message as string}
                 {...register("gender", { required: "Required" })}
               />
               <Select
@@ -185,9 +193,9 @@ export default function EmployeeCreatePage() {
                 {...register("email")}
               />
               <Input
-                id="phone"
+                id="contactNo"
                 label="Phone"
-                {...register("phone")}
+                {...register("contactNo")}
               />
               <Input
                 id="address"
@@ -209,13 +217,13 @@ export default function EmployeeCreatePage() {
               <Input
                 id="department"
                 label="Department"
-                error={errors.department?.message}
+                error={errors.department?.message as string}
                 {...register("department", { required: "Required" })}
               />
               <Input
                 id="position"
                 label="Position"
-                error={errors.position?.message}
+                error={errors.position?.message as string}
                 {...register("position", { required: "Required" })}
               />
               <Input
@@ -227,7 +235,7 @@ export default function EmployeeCreatePage() {
                 id="dateHired"
                 label="Date Hired"
                 type="date"
-                error={errors.dateHired?.message}
+                error={errors.dateHired?.message as string}
                 {...register("dateHired", { required: "Required" })}
               />
               <Select
@@ -235,7 +243,7 @@ export default function EmployeeCreatePage() {
                 label="Employment Status"
                 options={statusOptions}
                 placeholder="Select status"
-                error={errors.employmentStatus?.message}
+                error={errors.employmentStatus?.message as string}
                 {...register("employmentStatus", { required: "Required" })}
               />
             </div>

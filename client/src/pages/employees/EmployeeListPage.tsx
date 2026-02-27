@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
@@ -32,12 +33,12 @@ export default function EmployeeListPage() {
     return <Badge variant={map[status] ?? "secondary"}>{status}</Badge>;
   };
 
-  const columns = [
+  const columns: Array<{ key: string; header: string; render?: (row: Employee) => ReactNode; }> = [
     {
-      key: "employeeId",
-      header: "Employee ID",
+      key: "employeeNo",
+      header: "Employee No.",
       render: (row: Employee) => (
-        <span className="font-mono text-xs">{row.employeeId}</span>
+        <span className="font-mono text-xs">{row.employeeNo}</span>
       ),
     },
     {
@@ -94,10 +95,10 @@ export default function EmployeeListPage() {
         />
       </div>
 
-      <DataTable
+      <DataTable<Employee>
         columns={columns}
         data={(data?.data ?? []) as any}
-        onRowClick={(row: any) => navigate(`/employees/${row.id}`)}
+        onRowClick={(row: Employee) => navigate(`/employees/${row.id}`)}
       />
 
       {data && (
