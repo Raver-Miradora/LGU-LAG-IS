@@ -13,9 +13,7 @@ import type { DashboardStats } from "@/types";
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["dashboard-stats"],
-    queryFn: () => apiGet("/employees").then(() => null as any),
-    // In real implementation, this would call a dedicated stats endpoint
-    enabled: false,
+    queryFn: () => apiGet("/employees/dashboard"),
   });
 
   // Static placeholder stats until API endpoint is ready

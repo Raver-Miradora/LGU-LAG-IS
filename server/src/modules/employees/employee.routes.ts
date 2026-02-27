@@ -3,6 +3,8 @@ import { employeeController } from "./employee.controller";
 import { authenticate, authorize } from "../../middleware/auth";
 import { validate } from "../../middleware/validate";
 import { createEmployeeSchema, updateEmployeeSchema } from "./employee.schema";
+import employeeDocumentRouter from "./employee.document";
+import employeeIdCardRouter from "./employee.idcard";
 
 const router = Router();
 
@@ -49,4 +51,7 @@ router.patch(
   employeeController.archive
 );
 
+
+router.use(employeeDocumentRouter);
+router.use(employeeIdCardRouter);
 export default router;

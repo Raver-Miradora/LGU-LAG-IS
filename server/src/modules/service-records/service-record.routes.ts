@@ -1,3 +1,5 @@
+import serviceRecordPdfRouter from "./service-record.pdf";
+router.use(serviceRecordPdfRouter);
 import { Router } from "express";
 import { serviceRecordController } from "./service-record.controller";
 import { authenticate, authorize } from "../../middleware/auth";

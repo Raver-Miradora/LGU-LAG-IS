@@ -87,11 +87,31 @@ model Employee {
   lastName         String           @map("last_name")
   suffix           String?
   birthdate        DateTime
+  placeOfBirth     String?          @map("place_of_birth")
   gender           Gender
   civilStatus      String           @map("civil_status")
+  citizenship      String?          @map("citizenship")
+  height           String?          @map("height")
+  weight           String?          @map("weight")
+  bloodType        String?          @map("blood_type")
   address          String
+  residentialAddress String?        @map("residential_address")
+  permanentAddress String?          @map("permanent_address")
   contactNo        String?          @map("contact_no")
   email            String?
+  gsisNo           String?          @map("gsis_no")
+  sssNo            String?          @map("sss_no")
+  pagibigNo        String?          @map("pagibig_no")
+  philhealthNo     String?          @map("philhealth_no")
+  tinNo            String?          @map("tin_no")
+  spouseName       String?          @map("spouse_name")
+  spouseOccupation String?          @map("spouse_occupation")
+  spouseEmployer   String?          @map("spouse_employer")
+  spouseBusinessAddress String?     @map("spouse_business_address")
+  spouseContactNo  String?          @map("spouse_contact_no")
+  children         Json?            @map("children")
+  fatherName       String?          @map("father_name")
+  motherName       String?          @map("mother_name")
   position         String
   department       String
   salaryGrade      Int?             @map("salary_grade")
@@ -99,11 +119,10 @@ model Employee {
   employmentStatus EmploymentStatus @map("employment_status")
   dateHired        DateTime         @map("date_hired")
   photoUrl         String?          @map("photo_url")
-  bloodType        String?          @map("blood_type")
   emergencyContact String?          @map("emergency_contact")
   emergencyPhone   String?          @map("emergency_phone")
   educationBg      Json?            @map("education_bg")
-  eligibility      Json?
+  eligibility      Json?            @map("eligibility")
   isActive         Boolean          @default(true) @map("is_active")
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")

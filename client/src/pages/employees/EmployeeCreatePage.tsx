@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -10,7 +11,8 @@ import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
 import type { Employee } from "@/types";
 
-type EmployeeForm = Omit<Employee, "id" | "createdAt" | "updatedAt" | "serviceRecords">;
+
+// Add photo upload to form
 
 const genderOptions = [
   { value: "MALE", label: "Male" },
@@ -41,10 +43,21 @@ export default function EmployeeCreatePage() {
     formState: { errors },
   } = useForm<EmployeeForm>();
 
+  const photoInput = useRef<HTMLInputElement>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
   const onSubmit = async (data: EmployeeForm) => {
     setLoading(true);
     try {
-      await apiPost("/employees", data);
+      // 1. Create employee
+      const employee = await apiPost<Employee>("/employees", data);
+      // 2. Upload photo if selected
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("photo", photoFile);
+        await apiPost(`/employees/${employee.id}/photo`, formData);
+      }
       toast.success("Employee created successfully");
       navigate("/employees");
     } catch (err: any) {
@@ -68,7 +81,7 @@ export default function EmployeeCreatePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" encType="multipart/form-data">
         {/* Personal Information */}
         <Card>
           <CardHeader>
@@ -76,11 +89,39 @@ export default function EmployeeCreatePage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Photo upload */}
+              <div className="col-span-1 flex flex-col items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={photoInput}
+                  style={{ display: "none" }}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    setPhotoFile(file || null);
+                    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+                  }}
+                />
+                <div
+                  className="h-24 w-24 rounded-full border bg-gray-100 flex items-center justify-center cursor-pointer"
+                  onClick={() => photoInput.current?.click()}
+                >
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="Preview" className="h-24 w-24 rounded-full object-cover" />
+                  ) : (
+                    <span className="text-xs text-gray-400">Upload Photo</span>
+                  )}
+                </div>
+                {photoFile && (
+                  <button type="button" className="text-xs text-red-500" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}>Remove</button>
+                )}
+              </div>
+              {/* ...existing code for other fields... */}
               <Input
-                id="employeeId"
-                label="Employee ID"
-                error={errors.employeeId?.message}
-                {...register("employeeId", { required: "Required" })}
+                id="employeeNo"
+                label="Employee No."
+                error={errors.employeeNo?.message}
+                {...register("employeeNo", { required: "Required" })}
               />
               <Input
                 id="lastName"
