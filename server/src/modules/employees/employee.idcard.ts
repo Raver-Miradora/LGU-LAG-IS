@@ -13,7 +13,8 @@ router.get(
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "VIEWER"),
   async (req, res, next) => {
     try {
-      const employee = await prisma.employee.findUnique({ where: { id: req.params.id } });
+      const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string;
+      const employee = await prisma.employee.findUnique({ where: { id } });
       if (!employee) return res.status(404).json({ message: "Employee not found" });
       const doc = new PDFDocument({ size: [350, 220] });
       res.setHeader("Content-Type", "application/pdf");

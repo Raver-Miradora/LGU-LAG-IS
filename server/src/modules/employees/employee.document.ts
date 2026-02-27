@@ -25,14 +25,15 @@ router.post(
   upload.single("document"),
   async (req, res, next) => {
     try {
-      const employee = await prisma.employee.findUnique({ where: { id: req.params.id } });
+      const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string;
+      const employee = await prisma.employee.findUnique({ where: { id } });
       if (!employee) return res.status(404).json({ message: "Employee not found" });
       // multer guarantees file exists when this handler runs
       const file = req.file!;
       const filePath = `/uploads/documents/${file.filename}`;
       const doc = await prisma.employeeDocument.create({
         data: {
-          employeeId: req.params.id,
+          employeeId: id,
           fileName: file.originalname,
           filePath,
           fileType: file.mimetype,
@@ -52,7 +53,8 @@ router.get(
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "VIEWER"),
   async (req, res, next) => {
     try {
-      const docs = await prisma.employeeDocument.findMany({ where: { employeeId: req.params.id } });
+      const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id) as string;
+      const docs = await prisma.employeeDocument.findMany({ where: { employeeId: id } });
       res.json(docs);
     } catch (err) {
       next(err);
@@ -66,9 +68,10 @@ router.delete(
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
   async (req, res, next) => {
     try {
-      const doc = await prisma.employeeDocument.findUnique({ where: { id: req.params.docId } });
+      const docId = (Array.isArray(req.params.docId) ? req.params.docId[0] : req.params.docId) as string;
+      const doc = await prisma.employeeDocument.findUnique({ where: { id: docId } });
       if (!doc) return res.status(404).json({ message: "Document not found" });
-      await prisma.employeeDocument.delete({ where: { id: req.params.docId } });
+      await prisma.employeeDocument.delete({ where: { id: docId } });
       fs.unlinkSync(path.join(uploadDir, path.basename(doc.filePath)));
       res.json({ message: "Deleted" });
     } catch (err) {
