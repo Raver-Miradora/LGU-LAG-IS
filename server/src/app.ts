@@ -12,6 +12,7 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import authRoutes from "./modules/auth/auth.routes";
 import userRoutes from "./modules/users/user.routes";
 import employeeRoutes from "./modules/employees/employee.routes";
+import { documentRouter } from "./modules/employees/employee.document";
 import serviceRecordRoutes from "./modules/service-records/service-record.routes";
 import beneficiaryRoutes from "./modules/peso/beneficiary.routes";
 import programRoutes from "./modules/peso/program.routes";
@@ -77,6 +78,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/employees", employeeRoutes);
+// global document endpoints (download, etc.)
+app.use("/api/v1", documentRouter);
 app.use("/api/v1/service-records", serviceRecordRoutes);
 app.use("/api/v1/beneficiaries", beneficiaryRoutes);
 app.use("/api/v1/peso", programRoutes);

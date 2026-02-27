@@ -5,7 +5,11 @@ import fs from "fs";
 import prisma from "../../config/database";
 import { authenticate, authorize } from "../../middleware/auth";
 
+// router for employee-scoped document operations (list, upload, delete)
 const router = Router();
+// separate router for global document actions (download by doc id)
+export const documentRouter = Router();
+
 const uploadDir = path.join(__dirname, "../../../uploads/documents");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -62,7 +66,9 @@ router.get(
   }
 );
 
-router.get(
+// download route moved to separate router below
+
+documentRouter.get(
   "/documents/:docId/download",
   authenticate,
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "VIEWER"),

@@ -14,6 +14,7 @@ const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const EmployeeListPage = lazy(() => import("@/pages/employees/EmployeeListPage"));
 const EmployeeCreatePage = lazy(() => import("@/pages/employees/EmployeeCreatePage"));
+const EmployeeEditPage = lazy(() => import("@/pages/employees/EmployeeEditPage"));
 const EmployeeViewPage = lazy(() => import("@/pages/employees/EmployeeViewPage"));
 const ServiceRecordListPage = lazy(() => import("@/pages/service-records/ServiceRecordListPage"));
 const ServiceRecordCreatePage = lazy(() => import("@/pages/service-records/ServiceRecordCreatePage"));
@@ -79,6 +80,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <EmployeeViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "employees/:id/edit",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <EmployeeEditPage />
           </Suspense>
         ),
       },
