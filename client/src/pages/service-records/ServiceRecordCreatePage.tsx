@@ -11,14 +11,17 @@ import { toast } from "sonner";
 
 interface ServiceRecordForm {
   employeeId: string;
-  fromDate: string;
-  toDate?: string;
-  position: string;
-  department: string;
-  salaryGrade?: string;
-  monthlySalary?: number;
-  appointmentStatus: string;
-  isGovernmentService: boolean;
+  dateFrom: string;
+  dateTo?: string;
+  designation: string;
+  office: string;
+  salary?: number;
+  status: string;
+  branch?: string;
+  lwop?: string;
+  separationDate?: string;
+  separationCause?: string;
+  referenceNo?: string;
   remarks?: string;
 }
 
@@ -42,16 +45,28 @@ export default function ServiceRecordCreatePage() {
     handleSubmit,
     formState: { errors },
   } = useForm<ServiceRecordForm>({
-    defaultValues: { employeeId, isGovernmentService: true },
+    defaultValues: { employeeId },
   });
 
   const onSubmit = async (data: ServiceRecordForm) => {
     setLoading(true);
     try {
-      const url = employeeId
-        ? `/employees/${employeeId}/service-records`
-        : "/service-records";
-      await apiPost(url, data);
+      // Always POST to the employee-scoped route
+      const eid = data.employeeId || employeeId;
+      await apiPost(`/service-records/employee/${eid}`, {
+        dateFrom: data.dateFrom,
+        dateTo: data.dateTo || undefined,
+        designation: data.designation,
+        office: data.office,
+        salary: data.salary ? Number(data.salary) : 0,
+        status: data.status,
+        branch: data.branch || undefined,
+        lwop: data.lwop || undefined,
+        separationDate: data.separationDate || undefined,
+        separationCause: data.separationCause || undefined,
+        referenceNo: data.referenceNo || undefined,
+        remarks: data.remarks || undefined,
+      });
       toast.success("Service record created");
       navigate(employeeId ? `/employees/${employeeId}` : "/service-records");
     } catch (err: any) {
@@ -87,48 +102,53 @@ export default function ServiceRecordCreatePage() {
                 readOnly={Boolean(employeeId)}
               />
               <Input
-                id="fromDate"
+                id="dateFrom"
                 label="Service From"
                 type="date"
-                error={errors.fromDate?.message}
-                {...register("fromDate", { required: "Required" })}
+                error={errors.dateFrom?.message}
+                {...register("dateFrom", { required: "Required" })}
               />
               <Input
-                id="toDate"
+                id="dateTo"
                 label="Service To"
                 type="date"
-                {...register("toDate")}
+                {...register("dateTo")}
               />
               <Input
-                id="position"
+                id="designation"
                 label="Position / Designation"
-                error={errors.position?.message}
-                {...register("position", { required: "Required" })}
+                error={errors.designation?.message}
+                {...register("designation", { required: "Required" })}
               />
               <Input
-                id="department"
+                id="office"
                 label="Office / Department"
-                error={errors.department?.message}
-                {...register("department", { required: "Required" })}
+                error={errors.office?.message}
+                {...register("office", { required: "Required" })}
               />
               <Input
-                id="salaryGrade"
-                label="Salary Grade"
-                {...register("salaryGrade")}
-              />
-              <Input
-                id="monthlySalary"
+                id="salary"
                 label="Monthly Salary"
                 type="number"
-                {...register("monthlySalary", { valueAsNumber: true })}
+                {...register("salary", { valueAsNumber: true })}
               />
               <Select
-                id="appointmentStatus"
+                id="status"
                 label="Appointment Status"
                 options={appointmentOptions}
                 placeholder="Select status"
-                error={errors.appointmentStatus?.message}
-                {...register("appointmentStatus", { required: "Required" })}
+                error={errors.status?.message}
+                {...register("status", { required: "Required" })}
+              />
+              <Input
+                id="branch"
+                label="Branch"
+                {...register("branch")}
+              />
+              <Input
+                id="referenceNo"
+                label="Reference No."
+                {...register("referenceNo")}
               />
               <Input
                 id="remarks"

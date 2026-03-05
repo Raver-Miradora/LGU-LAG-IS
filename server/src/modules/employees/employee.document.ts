@@ -20,7 +20,18 @@ const storage = multer.diskStorage({
     cb(null, `empdoc_${req.params.id}_${Date.now()}${ext}`);
   },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /^(image\/(jpeg|png|gif|webp)|application\/pdf)$/;
+    if (allowed.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only images and PDF files are allowed") as any, false);
+    }
+  },
+});
 
 router.post(
   "/:id/documents",
@@ -95,7 +106,8 @@ router.delete(
       const doc = await prisma.employeeDocument.findUnique({ where: { id: docId } });
       if (!doc) return res.status(404).json({ message: "Document not found" });
       await prisma.employeeDocument.delete({ where: { id: docId } });
-      fs.unlinkSync(path.join(uploadDir, path.basename(doc.filePath)));
+      const diskPath = path.join(uploadDir, path.basename(doc.filePath));
+      if (fs.existsSync(diskPath)) fs.unlinkSync(diskPath);
       res.json({ message: "Deleted" });
     } catch (err) {
       next(err);

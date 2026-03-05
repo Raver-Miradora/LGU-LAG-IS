@@ -25,12 +25,15 @@ export default function EmployeeListPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-      ACTIVE: "success",
-      INACTIVE: "secondary",
-      SUSPENDED: "warning",
-      RETIRED: "destructive",
+      PERMANENT: "success",
+      CASUAL: "secondary",
+      COTERMINOUS: "secondary",
+      JOB_ORDER: "warning",
+      CONTRACT_OF_SERVICE: "warning",
+      TEMPORARY: "warning",
+      ELECTED: "success",
     };
-    return <Badge variant={map[status] ?? "secondary"}>{status}</Badge>;
+    return <Badge variant={map[status] ?? "secondary"}>{status.replace(/_/g, " ")}</Badge>;
   };
 
   const columns: Array<{ key: string; header: string; render?: (row: Employee) => ReactNode; }> = [

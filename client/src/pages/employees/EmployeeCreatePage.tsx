@@ -28,10 +28,13 @@ const genderOptions = [
 ];
 
 const statusOptions = [
-  { value: "ACTIVE", label: "Active" },
-  { value: "INACTIVE", label: "Inactive" },
-  { value: "SUSPENDED", label: "Suspended" },
-  { value: "RETIRED", label: "Retired" },
+  { value: "PERMANENT", label: "Permanent" },
+  { value: "CASUAL", label: "Casual" },
+  { value: "COTERMINOUS", label: "Coterminous" },
+  { value: "JOB_ORDER", label: "Job Order" },
+  { value: "CONTRACT_OF_SERVICE", label: "Contract of Service" },
+  { value: "TEMPORARY", label: "Temporary" },
+  { value: "ELECTED", label: "Elected" },
 ];
 
 const civilStatusOptions = [

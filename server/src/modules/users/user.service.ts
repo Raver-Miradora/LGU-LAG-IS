@@ -3,11 +3,20 @@ import prisma from "../../config/database";
 import { CreateUserInput, UpdateUserInput } from "./user.schema";
 
 export class UserService {
-  async findAll(page = 1, limit = 20) {
+  async findAll(page = 1, limit = 20, search?: string) {
     const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: "insensitive" } },
+        { fullName: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -21,7 +30,7 @@ export class UserService {
           updatedAt: true,
         },
       }),
-      prisma.user.count(),
+      prisma.user.count({ where }),
     ]);
 
     return {

@@ -9,7 +9,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { PageLoader } from "@/components/ui/Spinner";
-import { apiGet, apiPost, apiDelete } from "@/lib/api";
+import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { formatDate, ROLE_LABELS } from "@/lib/utils";
 import { toast } from "sonner";
 import type { User, PaginatedResponse, Role } from "@/types";
@@ -34,14 +34,14 @@ export default function UserManagementPage() {
       apiGet(`/users?page=${page}&limit=15&search=${encodeURIComponent(search)}`),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiDelete(`/users/${id}`),
+  const deactivateMutation = useMutation({
+    mutationFn: (id: string) => apiPatch(`/users/${id}/deactivate`),
     onSuccess: () => {
-      toast.success("User deleted");
+      toast.success("User deactivated");
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (err: any) => {
-      toast.error(err?.response?.data?.message || "Delete failed");
+      toast.error(err?.response?.data?.message || "Deactivation failed");
     },
   });
 
@@ -72,18 +72,19 @@ export default function UserManagementPage() {
     {
       key: "actions",
       header: "",
-      render: (r: User) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm("Delete this user?")) deleteMutation.mutate(r.id);
-          }}
-        >
-          <Trash2 className="h-4 w-4 text-[var(--destructive)]" />
-        </Button>
-      ),
+      render: (r: User) =>
+        r.isActive ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm("Deactivate this user?")) deactivateMutation.mutate(r.id);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-[var(--destructive)]" />
+          </Button>
+        ) : null,
     },
   ];
 
@@ -183,7 +184,7 @@ function CreateUserModal({
             error={errors.password?.message as string}
             {...register("password", {
               required: "Required",
-              minLength: { value: 6, message: "Min 6 characters" },
+              minLength: { value: 8, message: "Min 8 characters" },
             })}
           />
           <Select

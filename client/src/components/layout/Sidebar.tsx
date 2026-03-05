@@ -29,16 +29,16 @@ interface NavItem {
 }
 
 const hrNav: NavItem[] = [
-  { label: "Employees", to: "/employees", icon: Users },
-  { label: "Service Records", to: "/service-records", icon: FileText },
+  { label: "Employees", to: "/employees", icon: Users, roles: ["SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"] },
+  { label: "Service Records", to: "/service-records", icon: FileText, roles: ["SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"] },
 ];
 
 const pesoNav: NavItem[] = [
-  { label: "Beneficiaries", to: "/peso/beneficiaries", icon: Briefcase },
-  { label: "SPES", to: "/peso/spes", icon: GraduationCap },
-  { label: "OJT", to: "/peso/ojt", icon: HardHat },
-  { label: "TUPAD", to: "/peso/tupad", icon: Wrench },
-  { label: "Livelihood", to: "/peso/livelihood", icon: HandCoins },
+  { label: "Beneficiaries", to: "/peso/beneficiaries", icon: Briefcase, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
+  { label: "SPES", to: "/peso/spes", icon: GraduationCap, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
+  { label: "OJT", to: "/peso/ojt", icon: HardHat, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
+  { label: "TUPAD", to: "/peso/tupad", icon: Wrench, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
+  { label: "Livelihood", to: "/peso/livelihood", icon: HandCoins, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
 ];
 
 const adminNav: NavItem[] = [

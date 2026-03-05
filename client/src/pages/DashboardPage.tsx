@@ -1,26 +1,42 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   FileText,
   Briefcase,
   TrendingUp,
+  Plus,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { PageLoader } from "@/components/ui/Spinner";
 import { apiGet } from "@/lib/api";
 import type { CombinedDashboardStats } from "@/types";
 
-// combine HR and additional metrics used in cards
-// alias to shorter name for clarity
 type DashboardStats = CombinedDashboardStats;
 
+const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6"];
+
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["dashboard-stats"],
     queryFn: () => apiGet("/employees/dashboard"),
   });
 
-  // Static placeholder stats until API endpoint is ready
   const cards = [
     {
       label: "Total Employees",
@@ -54,13 +70,34 @@ export default function DashboardPage() {
 
   if (isLoading) return <PageLoader />;
 
+  // chart data
+  const deptData = (stats?.byDepartment ?? []).map((d) => ({
+    name: d.department?.length > 15 ? d.department.slice(0, 14) + "…" : d.department,
+    count: d.count,
+  }));
+
+  const statusData = (stats?.byStatus ?? []).map((s) => ({
+    name: s.status?.replace(/_/g, " "),
+    value: s.count,
+  }));
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          Welcome to the LGU Lagonoy Information System
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Welcome to the LGU Lagonoy Information System
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" onClick={() => navigate("/employees/new")}>
+            <Plus className="mr-1 h-4 w-4" /> New Employee
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => navigate("/peso/beneficiaries/new")}>
+            <Plus className="mr-1 h-4 w-4" /> New Beneficiary
+          </Button>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -84,6 +121,65 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Department Breakdown Bar Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Employees by Department</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {deptData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={deptData} margin={{ top: 5, right: 20, bottom: 40, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-35} textAnchor="end" fontSize={10} interval={0} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-[var(--muted-foreground)]">No department data yet</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Employment Status Pie Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Employment Status</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    dataKey="value"
+                    nameKey="name"
+                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                    fontSize={9}
+                  >
+                    {statusData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend fontSize={10} />
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-[var(--muted-foreground)]">No status data yet</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}

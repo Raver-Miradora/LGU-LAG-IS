@@ -19,7 +19,7 @@ router.get(
 
 router.get(
   "/dashboard",
-  authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
+  authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "PESO_ADMIN", "PESO_STAFF", "VIEWER"),
   employeeController.getDashboardStats
 );
 

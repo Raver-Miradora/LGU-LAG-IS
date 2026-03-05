@@ -17,37 +17,38 @@ export default function ServiceRecordListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading } = useQuery<PaginatedResponse<ServiceRecord>>({
+  const { data, isLoading } = useQuery<PaginatedResponse<ServiceRecord> | ServiceRecord[]>({
     queryKey: ["service-records", page, search, employeeId],
     queryFn: () => {
-      let url = `/service-records?page=${page}&limit=15&search=${encodeURIComponent(search)}`;
-      if (employeeId) url += `&employeeId=${employeeId}`;
-      return apiGet(url);
+      if (employeeId) {
+        // employee-scoped route returns an array directly
+        return apiGet(`/service-records/employee/${employeeId}`);
+      }
+      // TODO: global paginated listing not yet implemented on backend
+      return apiGet(`/service-records/employee/all`);
     },
   });
 
+  // normalise: backend may return array or paginated wrapper
+  const records: ServiceRecord[] = Array.isArray(data)
+    ? data
+    : (data as PaginatedResponse<ServiceRecord>)?.data ?? [];
+
   const columns = [
     {
-      key: "employeeName",
-      header: "Employee",
-      render: (r: ServiceRecord) => (
-        <span className="font-medium">{(r as any).employee?.firstName} {(r as any).employee?.lastName}</span>
-      ),
-    },
-    {
-      key: "fromDate",
+      key: "dateFrom",
       header: "From",
-      render: (r: ServiceRecord) => formatDate(r.fromDate),
+      render: (r: ServiceRecord) => formatDate(r.dateFrom),
     },
     {
-      key: "toDate",
+      key: "dateTo",
       header: "To",
-      render: (r: ServiceRecord) => r.toDate ? formatDate(r.toDate) : "Present",
+      render: (r: ServiceRecord) => r.dateTo ? formatDate(r.dateTo) : "Present",
     },
-    { key: "position", header: "Position" },
-    { key: "department", header: "Department" },
-    { key: "salaryGrade", header: "SG" },
-    { key: "appointmentStatus", header: "Appointment" },
+    { key: "designation", header: "Position" },
+    { key: "office", header: "Office" },
+    { key: "salary", header: "Salary" },
+    { key: "status", header: "Appointment" },
   ];
 
   if (isLoading) return <PageLoader />;
@@ -91,9 +92,9 @@ export default function ServiceRecordListPage() {
         />
       </div>
 
-      <DataTable columns={columns} data={(data?.data ?? []) as any} />
+      <DataTable columns={columns} data={records as any} />
 
-      {data && (
+      {!Array.isArray(data) && data && (
         <Pagination
           page={data.meta.page}
           totalPages={data.meta.totalPages}
