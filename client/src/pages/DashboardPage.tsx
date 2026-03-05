@@ -32,7 +32,7 @@ const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { data: stats, isLoading } = useQuery<DashboardStats>({
+  const { data: stats, isLoading, isError } = useQuery<DashboardStats>({
     queryKey: ["dashboard-stats"],
     queryFn: () => apiGet("/employees/dashboard"),
   });
@@ -69,6 +69,13 @@ export default function DashboardPage() {
   ];
 
   if (isLoading) return <PageLoader />;
+  if (isError)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-lg font-semibold text-red-600">Failed to load dashboard</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Please check the server connection and try again.</p>
+      </div>
+    );
 
   // chart data
   const deptData = (stats?.byDepartment ?? []).map((d) => ({

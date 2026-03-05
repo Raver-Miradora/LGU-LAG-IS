@@ -10,10 +10,19 @@ import { Badge } from "@/components/ui/Badge";
 import { Pagination } from "@/components/ui/Pagination";
 import { Modal } from "@/components/ui/Modal";
 import { PageLoader } from "@/components/ui/Spinner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { apiGet, apiPost } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
+
+export interface FormFieldDef {
+  name: string;
+  label: string;
+  type?: "text" | "date" | "number" | "select";
+  required?: boolean;
+  options?: { value: string; label: string }[];
+  placeholder?: string;
+  valueAsNumber?: boolean;
+}
 
 interface ProgramPageProps {
   programKey: string;
@@ -21,7 +30,7 @@ interface ProgramPageProps {
   description: string;
   endpoint: string;
   extraColumns?: { key: string; header: string; render?: (r: any) => React.ReactNode }[];
-  extraFields?: React.ReactNode;
+  formFields?: FormFieldDef[];
 }
 
 /**
@@ -33,14 +42,14 @@ export default function ProgramPage({
   description,
   endpoint,
   extraColumns = [],
-  extraFields,
+  formFields = [],
 }: ProgramPageProps) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: [programKey, page, search],
     queryFn: () =>
       apiGet(`${endpoint}?page=${page}&limit=15&search=${encodeURIComponent(search)}`),
@@ -70,6 +79,13 @@ export default function ProgramPage({
           COMPLETED: "secondary",
           DROPPED: "destructive",
           PENDING: "warning",
+          GRADUATED: "success",
+          TERMINATED: "destructive",
+          ON_HOLD: "warning",
+          APPLIED: "warning",
+          APPROVED: "success",
+          DISBURSED: "success",
+          MONITORING: "warning",
         };
         return <Badge variant={map[r.status] ?? "secondary"}>{r.status}</Badge>;
       },
@@ -110,6 +126,11 @@ export default function ProgramPage({
 
       {isLoading ? (
         <PageLoader />
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <p className="text-lg font-semibold text-red-600">Failed to load {title.toLowerCase()}</p>
+          <p className="text-sm text-[var(--muted-foreground)]">Please check the server connection and try again.</p>
+        </div>
       ) : (
         <>
           <DataTable columns={baseColumns} data={((data as any)?.data ?? []) as any} />
@@ -130,6 +151,7 @@ export default function ProgramPage({
         endpoint={endpoint}
         programKey={programKey}
         queryClient={queryClient}
+        formFields={formFields}
       />
     </div>
   );
@@ -141,12 +163,14 @@ function EnrollmentModal({
   endpoint,
   programKey,
   queryClient,
+  formFields,
 }: {
   open: boolean;
   onClose: () => void;
   endpoint: string;
   programKey: string;
   queryClient: any;
+  formFields: FormFieldDef[];
 }) {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
@@ -163,44 +187,42 @@ function EnrollmentModal({
     },
   });
 
+  // Default fields + program-specific fields
+  const allFields: FormFieldDef[] = [
+    { name: "beneficiaryId", label: "Beneficiary ID", required: true },
+    ...formFields,
+    { name: "remarks", label: "Remarks" },
+  ];
+
   return (
     <Modal open={open} onClose={onClose} title="New Enrollment" size="lg">
       <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input
-            id="beneficiaryId"
-            label="Beneficiary ID"
-            error={errors.beneficiaryId?.message as string}
-            {...register("beneficiaryId", { required: "Required" })}
-          />
-          <Select
-            id="status"
-            label="Status"
-            options={[
-              { value: "ACTIVE", label: "Active" },
-              { value: "PENDING", label: "Pending" },
-            ]}
-            placeholder="Select status"
-            {...register("status")}
-          />
-          <Input
-            id="startDate"
-            label="Start Date"
-            type="date"
-            {...register("startDate")}
-          />
-          <Input
-            id="endDate"
-            label="End Date"
-            type="date"
-            {...register("endDate")}
-          />
-          <Input
-            id="remarks"
-            label="Remarks"
-            className="sm:col-span-2"
-            {...register("remarks")}
-          />
+          {allFields.map((field) =>
+            field.type === "select" && field.options ? (
+              <Select
+                key={field.name}
+                id={field.name}
+                label={field.label}
+                options={field.options}
+                placeholder={field.placeholder || `Select ${field.label.toLowerCase()}`}
+                error={errors[field.name]?.message as string}
+                {...register(field.name, field.required ? { required: "Required" } : {})}
+              />
+            ) : (
+              <Input
+                key={field.name}
+                id={field.name}
+                label={field.label}
+                type={field.type || "text"}
+                error={errors[field.name]?.message as string}
+                {...register(field.name, {
+                  ...(field.required ? { required: "Required" } : {}),
+                  ...(field.valueAsNumber ? { valueAsNumber: true } : {}),
+                })}
+              />
+            )
+          )}
         </div>
         <div className="mt-6 flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={onClose}>

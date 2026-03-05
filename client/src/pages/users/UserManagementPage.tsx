@@ -12,7 +12,7 @@ import { PageLoader } from "@/components/ui/Spinner";
 import { apiGet, apiPost, apiPatch } from "@/lib/api";
 import { formatDate, ROLE_LABELS } from "@/lib/utils";
 import { toast } from "sonner";
-import type { User, PaginatedResponse, Role } from "@/types";
+import type { User, PaginatedResponse } from "@/types";
 
 const roleOptions = [
   { value: "HR_ADMIN", label: "HR Admin" },
@@ -118,7 +118,7 @@ export default function UserManagementPage() {
         />
       </div>
 
-      <DataTable columns={columns} data={(data?.data ?? []) as any} />
+      <DataTable columns={columns as any} data={(data?.data ?? []) as any} />
 
       {data && (
         <div className="flex items-center justify-between">

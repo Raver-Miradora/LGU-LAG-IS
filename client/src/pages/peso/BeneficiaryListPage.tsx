@@ -5,12 +5,11 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { DataTable } from "@/components/ui/DataTable";
-import { Badge } from "@/components/ui/Badge";
 import { Pagination } from "@/components/ui/Pagination";
 import { PageLoader } from "@/components/ui/Spinner";
 import { apiGet } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import type { PesoBeneficiary, PaginatedResponse } from "@/types";
+import type { Beneficiary, PaginatedResponse } from "@/types";
 
 const programOptions = [
   { value: "", label: "All Programs" },
@@ -26,11 +25,11 @@ export default function BeneficiaryListPage() {
   const [search, setSearch] = useState("");
   const [programFilter, setProgramFilter] = useState("");
 
-  const { data, isLoading } = useQuery<PaginatedResponse<PesoBeneficiary>>({
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<Beneficiary>>({
     queryKey: ["beneficiaries", page, search, programFilter],
     queryFn: () => {
       let url = `/peso/beneficiaries?page=${page}&limit=15&search=${encodeURIComponent(search)}`;
-      if (programFilter) url += `&programType=${programFilter}`;
+      if (programFilter) url += `&program=${programFilter}`;
       return apiGet(url);
     },
   });
@@ -39,30 +38,44 @@ export default function BeneficiaryListPage() {
     {
       key: "name",
       header: "Name",
-      render: (r: PesoBeneficiary) => (
+      render: (r: Beneficiary) => (
         <span className="font-medium">
           {r.lastName}, {r.firstName} {r.middleName ?? ""}
         </span>
       ),
     },
-    {
-      key: "programType",
-      header: "Program",
-      render: (r: PesoBeneficiary) => (
-        <Badge variant="secondary">{r.programType}</Badge>
-      ),
-    },
     { key: "barangay", header: "Barangay" },
     {
-      key: "dateOfBirth",
+      key: "birthdate",
       header: "DOB",
-      render: (r: PesoBeneficiary) => formatDate(r.dateOfBirth),
+      render: (r: Beneficiary) => formatDate(r.birthdate),
     },
-    { key: "contactNumber", header: "Contact" },
-    { key: "batchYear", header: "Batch" },
+    { key: "gender", header: "Gender" },
+    { key: "contactNo", header: "Contact" },
+    {
+      key: "enrollments",
+      header: "Enrollments",
+      render: (r: Beneficiary) => {
+        const c = r._count;
+        if (!c) return "--";
+        const total =
+          (c.spesEnrollments || 0) +
+          (c.ojtEnrollments || 0) +
+          (c.tupadEnrollments || 0) +
+          (c.livelihoodEnrollments || 0);
+        return total;
+      },
+    },
   ];
 
   if (isLoading) return <PageLoader />;
+  if (isError)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-lg font-semibold text-red-600">Failed to load beneficiaries</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Please check the server connection and try again.</p>
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -104,7 +117,7 @@ export default function BeneficiaryListPage() {
       </div>
 
       <DataTable
-        columns={columns}
+        columns={columns as any}
         data={(data?.data ?? []) as any}
         onRowClick={(row: any) => navigate(`/peso/beneficiaries/${row.id}`)}
       />

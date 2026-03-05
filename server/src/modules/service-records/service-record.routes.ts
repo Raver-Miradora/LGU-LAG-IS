@@ -15,6 +15,13 @@ router.use(serviceRecordPdfRouter);
 
 router.use(authenticate);
 
+// Global paginated listing of all service records
+router.get(
+  "/",
+  authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "VIEWER"),
+  serviceRecordController.findAll
+);
+
 // Get service records for an employee
 router.get(
   "/employee/:employeeId",

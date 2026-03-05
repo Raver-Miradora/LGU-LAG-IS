@@ -81,7 +81,7 @@ app.use("/api/v1/employees", employeeRoutes);
 // global document endpoints (download, etc.)
 app.use("/api/v1", documentRouter);
 app.use("/api/v1/service-records", serviceRecordRoutes);
-app.use("/api/v1/beneficiaries", beneficiaryRoutes);
+app.use("/api/v1/peso/beneficiaries", beneficiaryRoutes);
 app.use("/api/v1/peso", programRoutes);
 
 // ─── ERROR HANDLING ─────────────────────────────────

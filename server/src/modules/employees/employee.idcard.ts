@@ -103,10 +103,9 @@ router.get(
           data: {
             employeeId: id,
             idNumber: `LGU-${employee.employeeNo}-${currentYear}`,
-            issueDate: new Date(),
+            issuedDate: new Date(),
             expiryDate: new Date(`${currentYear + 1}-12-31`),
             qrData: employee.employeeNo,
-            template: "CR80_V1",
           },
         });
       }

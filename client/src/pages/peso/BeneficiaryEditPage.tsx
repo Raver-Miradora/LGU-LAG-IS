@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { apiPost } from "@/lib/api";
+import { PageLoader } from "@/components/ui/Spinner";
+import { apiGet, apiPut } from "@/lib/api";
 import { toast } from "sonner";
+import type { Beneficiary } from "@/types";
 
 interface BeneficiaryForm {
   firstName: string;
@@ -47,45 +50,67 @@ const educationOptions = [
   { value: "Post-Graduate", label: "Post-Graduate" },
 ];
 
-export default function BeneficiaryCreatePage() {
+export default function BeneficiaryEditPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const { data: beneficiary, isLoading } = useQuery<Beneficiary>({
+    queryKey: ["beneficiary", id],
+    queryFn: () => apiGet(`/peso/beneficiaries/${id}`),
+    enabled: !!id,
+  });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<BeneficiaryForm>();
+  } = useForm<BeneficiaryForm>({
+    values: beneficiary
+      ? {
+          firstName: beneficiary.firstName,
+          middleName: beneficiary.middleName ?? "",
+          lastName: beneficiary.lastName,
+          suffix: beneficiary.suffix ?? "",
+          birthdate: beneficiary.birthdate?.slice(0, 10) ?? "",
+          gender: beneficiary.gender,
+          civilStatus: beneficiary.civilStatus,
+          contactNo: beneficiary.contactNo ?? "",
+          email: beneficiary.email ?? "",
+          address: beneficiary.address,
+          barangay: beneficiary.barangay,
+          educationLevel: beneficiary.educationLevel ?? "",
+          school: beneficiary.school ?? "",
+          course: beneficiary.course ?? "",
+        }
+      : undefined,
+  });
 
   const onSubmit = async (data: BeneficiaryForm) => {
-    setLoading(true);
+    setSaving(true);
     try {
-      await apiPost("/peso/beneficiaries", data);
-      toast.success("Beneficiary created successfully");
-      navigate("/peso/beneficiaries");
+      await apiPut(`/peso/beneficiaries/${id}`, data);
+      toast.success("Beneficiary updated successfully");
+      navigate(`/peso/beneficiaries/${id}`);
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Failed to create beneficiary"
-      );
+      toast.error(err?.response?.data?.message || "Failed to update beneficiary");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (isLoading) return <PageLoader />;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/peso/beneficiaries")}
-        >
+        <Button variant="ghost" size="sm" onClick={() => navigate(`/peso/beneficiaries/${id}`)}>
           <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Add Beneficiary</h1>
+          <h1 className="text-2xl font-bold">Edit Beneficiary</h1>
           <p className="text-sm text-[var(--muted-foreground)]">
-            Register a new PESO beneficiary
+            Update beneficiary information
           </p>
         </div>
       </div>
@@ -109,16 +134,8 @@ export default function BeneficiaryCreatePage() {
                 error={errors.firstName?.message}
                 {...register("firstName", { required: "Required" })}
               />
-              <Input
-                id="middleName"
-                label="Middle Name"
-                {...register("middleName")}
-              />
-              <Input
-                id="suffix"
-                label="Suffix"
-                {...register("suffix")}
-              />
+              <Input id="middleName" label="Middle Name" {...register("middleName")} />
+              <Input id="suffix" label="Suffix" {...register("suffix")} />
               <Input
                 id="birthdate"
                 label="Date of Birth"
@@ -130,7 +147,6 @@ export default function BeneficiaryCreatePage() {
                 id="gender"
                 label="Gender"
                 options={genderOptions}
-                placeholder="Select gender"
                 error={errors.gender?.message}
                 {...register("gender", { required: "Required" })}
               />
@@ -138,15 +154,10 @@ export default function BeneficiaryCreatePage() {
                 id="civilStatus"
                 label="Civil Status"
                 options={civilStatusOptions}
-                placeholder="Select status"
                 error={errors.civilStatus?.message}
                 {...register("civilStatus", { required: "Required" })}
               />
-              <Input
-                id="contactNo"
-                label="Contact Number"
-                {...register("contactNo")}
-              />
+              <Input id="contactNo" label="Contact Number" {...register("contactNo")} />
               <Input id="email" label="Email" type="email" {...register("email")} />
             </div>
           </CardContent>
@@ -174,33 +185,20 @@ export default function BeneficiaryCreatePage() {
                 id="educationLevel"
                 label="Education Level"
                 options={educationOptions}
-                placeholder="Select level"
                 {...register("educationLevel")}
               />
-              <Input
-                id="school"
-                label="School"
-                {...register("school")}
-              />
-              <Input
-                id="course"
-                label="Course"
-                {...register("course")}
-              />
+              <Input id="school" label="School" {...register("school")} />
+              <Input id="course" label="Course" {...register("course")} />
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/peso/beneficiaries")}
-          >
+          <Button type="button" variant="outline" onClick={() => navigate(`/peso/beneficiaries/${id}`)}>
             Cancel
           </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : "Save Beneficiary"}
+          <Button type="submit" disabled={saving}>
+            {saving ? "Saving..." : "Update Beneficiary"}
           </Button>
         </div>
       </form>

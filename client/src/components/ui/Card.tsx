@@ -1,18 +1,20 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface CardProps {
+export interface CardProps {
   className?: string;
   children: ReactNode;
+  onClick?: () => void;
 }
 
-export function Card({ className, children }: CardProps) {
+export function Card({ className, children, onClick }: CardProps) {
   return (
     <div
       className={cn(
         "rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
         className
       )}
+      onClick={onClick}
     >
       {children}
     </div>

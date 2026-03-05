@@ -2,6 +2,39 @@ import prisma from "../../config/database";
 import { CreateServiceRecordInput } from "./service-record.schema";
 
 export class ServiceRecordService {
+  async findAll(query: { page?: number; limit?: number; search?: string }) {
+    const page = query.page || 1;
+    const limit = query.limit || 20;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.search) {
+      where.OR = [
+        { designation: { contains: query.search, mode: "insensitive" } },
+        { office: { contains: query.search, mode: "insensitive" } },
+        { employee: { firstName: { contains: query.search, mode: "insensitive" } } },
+        { employee: { lastName: { contains: query.search, mode: "insensitive" } } },
+      ];
+    }
+
+    const [data, total] = await Promise.all([
+      prisma.serviceRecord.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { dateFrom: "desc" },
+        include: {
+          employee: {
+            select: { id: true, firstName: true, lastName: true, employeeNo: true },
+          },
+        },
+      }),
+      prisma.serviceRecord.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
   async findByEmployee(employeeId: string) {
     const employee = await prisma.employee.findUnique({
       where: { id: employeeId },

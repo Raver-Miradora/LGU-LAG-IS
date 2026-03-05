@@ -2,6 +2,19 @@ import { Request, Response, NextFunction } from "express";
 import { serviceRecordService } from "./service-record.service";
 
 export class ServiceRecordController {
+  async findAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await serviceRecordService.findAll({
+        page: parseInt(req.query.page as string) || 1,
+        limit: parseInt(req.query.limit as string) || 20,
+        search: req.query.search as string,
+      });
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async findByEmployee(req: Request, res: Response, next: NextFunction) {
     try {
       const records = await serviceRecordService.findByEmployee(

@@ -17,19 +17,17 @@ export default function ServiceRecordListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  const { data, isLoading } = useQuery<PaginatedResponse<ServiceRecord> | ServiceRecord[]>({
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<ServiceRecord> | ServiceRecord[]>({
     queryKey: ["service-records", page, search, employeeId],
     queryFn: () => {
       if (employeeId) {
-        // employee-scoped route returns an array directly
         return apiGet(`/service-records/employee/${employeeId}`);
       }
-      // TODO: global paginated listing not yet implemented on backend
-      return apiGet(`/service-records/employee/all`);
+      return apiGet(`/service-records?page=${page}&limit=15&search=${encodeURIComponent(search)}`);
     },
   });
 
-  // normalise: backend may return array or paginated wrapper
+  // normalise: employee-scoped returns array, global returns paginated wrapper
   const records: ServiceRecord[] = Array.isArray(data)
     ? data
     : (data as PaginatedResponse<ServiceRecord>)?.data ?? [];
@@ -52,6 +50,13 @@ export default function ServiceRecordListPage() {
   ];
 
   if (isLoading) return <PageLoader />;
+  if (isError)
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-lg font-semibold text-red-600">Failed to load service records</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Please check the server connection and try again.</p>
+      </div>
+    );
 
   return (
     <div className="space-y-6">
@@ -92,7 +97,7 @@ export default function ServiceRecordListPage() {
         />
       </div>
 
-      <DataTable columns={columns} data={records as any} />
+      <DataTable columns={columns as any} data={records as any} />
 
       {!Array.isArray(data) && data && (
         <Pagination

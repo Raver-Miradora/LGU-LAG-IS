@@ -34,6 +34,7 @@ const hrNav: NavItem[] = [
 ];
 
 const pesoNav: NavItem[] = [
+  { label: "PESO Dashboard", to: "/peso/dashboard", icon: LayoutDashboard, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
   { label: "Beneficiaries", to: "/peso/beneficiaries", icon: Briefcase, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
   { label: "SPES", to: "/peso/spes", icon: GraduationCap, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },
   { label: "OJT", to: "/peso/ojt", icon: HardHat, roles: ["SUPER_ADMIN", "PESO_ADMIN", "PESO_STAFF"] },

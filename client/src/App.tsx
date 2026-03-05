@@ -20,10 +20,13 @@ const ServiceRecordListPage = lazy(() => import("@/pages/service-records/Service
 const ServiceRecordCreatePage = lazy(() => import("@/pages/service-records/ServiceRecordCreatePage"));
 const BeneficiaryListPage = lazy(() => import("@/pages/peso/BeneficiaryListPage"));
 const BeneficiaryCreatePage = lazy(() => import("@/pages/peso/BeneficiaryCreatePage"));
+const BeneficiaryViewPage = lazy(() => import("@/pages/peso/BeneficiaryViewPage"));
+const BeneficiaryEditPage = lazy(() => import("@/pages/peso/BeneficiaryEditPage"));
 const SpesPage = lazy(() => import("@/pages/peso/SpesPage"));
 const OjtPage = lazy(() => import("@/pages/peso/OjtPage"));
 const TupadPage = lazy(() => import("@/pages/peso/TupadPage"));
 const LivelihoodPage = lazy(() => import("@/pages/peso/LivelihoodPage"));
+const PesoDashboardPage = lazy(() => import("@/pages/peso/PesoDashboardPage"));
 const UserManagementPage = lazy(() => import("@/pages/users/UserManagementPage"));
 
 const queryClient = new QueryClient({
@@ -126,6 +129,22 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: "peso/beneficiaries/:id",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <BeneficiaryViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "peso/beneficiaries/:id/edit",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <BeneficiaryEditPage />
+          </Suspense>
+        ),
+      },
+      {
         path: "peso/spes",
         element: (
           <Suspense fallback={<PageLoader />}>
@@ -154,6 +173,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <LivelihoodPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "peso/dashboard",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <PesoDashboardPage />
           </Suspense>
         ),
       },

@@ -1249,12 +1249,12 @@ Given that Philippine LGUs typically have local servers, the recommended deploym
 - [x] HR dashboard with statistics
 
 ### Phase 3: PESO Module (Weeks 8–11)
-- [ ] Beneficiary registration CRUD
-- [ ] SPES enrollment and management
-- [ ] OJT enrollment and management
-- [ ] TUPAD enrollment and management
-- [ ] Livelihood enrollment and management
-- [ ] Program-specific dashboards
+- [x] Beneficiary registration CRUD
+- [x] SPES enrollment and management
+- [x] OJT enrollment and management
+- [x] TUPAD enrollment and management
+- [x] Livelihood enrollment and management
+- [x] Program-specific dashboards
 - [ ] Program report PDF generation
 
 ### Phase 4: Polish & Deployment (Weeks 12–14)
