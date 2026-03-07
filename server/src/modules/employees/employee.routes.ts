@@ -8,6 +8,7 @@ import employeeIdCardRouter from "./employee.idcard";
 import employeePdsRouter from "./employee.pds";
 import employeeBatchIdRouter from "./employee.batchid";
 import employeeExportRouter from "./employee.export";
+import { auditLog } from "../../middleware/auditLog";
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.post(
   "/",
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
   validate(createEmployeeSchema),
+  auditLog("CREATE", "EMPLOYEE"),
   employeeController.create
 );
 
@@ -47,6 +49,7 @@ router.put(
   "/:id",
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
   validate(updateEmployeeSchema),
+  auditLog("UPDATE", "EMPLOYEE"),
   employeeController.update
 );
 
@@ -54,6 +57,7 @@ router.put(
 router.patch(
   "/:id/archive",
   authorize("SUPER_ADMIN", "HR_ADMIN"),
+  auditLog("ARCHIVE", "EMPLOYEE"),
   employeeController.archive
 );
 

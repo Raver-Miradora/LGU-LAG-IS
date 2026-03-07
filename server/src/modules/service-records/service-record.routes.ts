@@ -7,6 +7,7 @@ import {
   createServiceRecordSchema,
   updateServiceRecordSchema,
 } from "./service-record.schema";
+import { auditLog } from "../../middleware/auditLog";
 
 const router = Router();
 
@@ -34,6 +35,7 @@ router.post(
   "/employee/:employeeId",
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
   validate(createServiceRecordSchema),
+  auditLog("CREATE", "SERVICE_RECORD"),
   serviceRecordController.create
 );
 
@@ -42,6 +44,7 @@ router.put(
   "/:id",
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF"),
   validate(updateServiceRecordSchema),
+  auditLog("UPDATE", "SERVICE_RECORD"),
   serviceRecordController.update
 );
 
@@ -49,6 +52,7 @@ router.put(
 router.delete(
   "/:id",
   authorize("SUPER_ADMIN", "HR_ADMIN"),
+  auditLog("DELETE", "SERVICE_RECORD"),
   serviceRecordController.delete
 );
 
