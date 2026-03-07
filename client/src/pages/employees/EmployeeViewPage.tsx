@@ -1,22 +1,34 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Edit,
   FileText,
   CreditCard,
+  Archive,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
 import { PageLoader } from "@/components/ui/Spinner";
 import { DataTable } from "@/components/ui/DataTable";
-import { apiGet, apiGetBlob } from "@/lib/api";
+import { apiGet, apiGetBlob, apiPatch } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "sonner";
 import type { Employee, ServiceRecord } from "@/types";
 
 export default function EmployeeViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+  const [archiveModalOpen, setArchiveModalOpen] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+
+  const canArchive = user?.role === "SUPER_ADMIN" || user?.role === "HR_ADMIN";
 
   // Employee data
   const { data: employee, isLoading } = useQuery<Employee>({
@@ -56,6 +68,22 @@ export default function EmployeeViewPage() {
     if (!employee) return;
     const blob = await apiGetBlob(`/employees/${employee.id}/idcard`);
     openBlob(blob, `idcard-${employee.employeeNo}.pdf`);
+  };
+
+  const handleArchive = async () => {
+    setArchiving(true);
+    try {
+      await apiPatch(`/employees/${id}/archive`);
+      toast.success("Employee archived successfully");
+      queryClient.invalidateQueries({ queryKey: ["employee", id] });
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      setArchiveModalOpen(false);
+      navigate("/employees");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to archive employee");
+    } finally {
+      setArchiving(false);
+    }
   };
 
 
@@ -100,6 +128,18 @@ export default function EmployeeViewPage() {
           <Button size="sm" onClick={() => navigate(`/employees/${id}/edit`)}>
             <Edit className="mr-1 h-4 w-4" /> Edit
           </Button>
+          {canArchive && employee?.isActive && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setArchiveModalOpen(true)}
+            >
+              <Archive className="mr-1 h-4 w-4" /> Archive
+            </Button>
+          )}
+          {employee && !employee.isActive && (
+            <Badge variant="destructive">Archived</Badge>
+          )}
         </div>
       </div>
       {/* employee details */}
@@ -154,6 +194,28 @@ export default function EmployeeViewPage() {
           <ServiceRecordsTable employeeId={employee.id} />
         </div>
       )}
+
+      {/* Archive Confirmation Modal */}
+      <Modal
+        open={archiveModalOpen}
+        onClose={() => setArchiveModalOpen(false)}
+        title="Archive Employee"
+        size="sm"
+      >
+        <p className="text-sm text-[var(--muted-foreground)]">
+          Are you sure you want to archive{" "}
+          <strong>{employee?.lastName}, {employee?.firstName}</strong>? 
+          This will mark the employee as inactive. The record will not be deleted.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={() => setArchiveModalOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleArchive} disabled={archiving}>
+            {archiving ? "Archiving..." : "Archive Employee"}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
