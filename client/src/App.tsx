@@ -18,6 +18,7 @@ const EmployeeEditPage = lazy(() => import("@/pages/employees/EmployeeEditPage")
 const EmployeeViewPage = lazy(() => import("@/pages/employees/EmployeeViewPage"));
 const ServiceRecordListPage = lazy(() => import("@/pages/service-records/ServiceRecordListPage"));
 const ServiceRecordCreatePage = lazy(() => import("@/pages/service-records/ServiceRecordCreatePage"));
+const ServiceRecordEditPage = lazy(() => import("@/pages/service-records/ServiceRecordEditPage"));
 const BeneficiaryListPage = lazy(() => import("@/pages/peso/BeneficiaryListPage"));
 const BeneficiaryCreatePage = lazy(() => import("@/pages/peso/BeneficiaryCreatePage"));
 const BeneficiaryViewPage = lazy(() => import("@/pages/peso/BeneficiaryViewPage"));
@@ -108,6 +109,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <ServiceRecordCreatePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "service-records/:id/edit",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <ServiceRecordEditPage />
           </Suspense>
         ),
       },

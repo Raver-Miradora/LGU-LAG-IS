@@ -7,6 +7,7 @@ import {
   FileText,
   CreditCard,
   Archive,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -14,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { PageLoader } from "@/components/ui/Spinner";
 import { DataTable } from "@/components/ui/DataTable";
-import { apiGet, apiGetBlob, apiPatch } from "@/lib/api";
+import { apiGet, apiGetBlob, apiPatch, apiDelete } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "sonner";
@@ -222,24 +223,79 @@ export default function EmployeeViewPage() {
 
 // component for records
 function ServiceRecordsTable({ employeeId }: { employeeId: string }) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
+  const canEdit = user?.role === "SUPER_ADMIN" || user?.role === "HR_ADMIN" || user?.role === "HR_STAFF";
+  const canDelete = user?.role === "SUPER_ADMIN" || user?.role === "HR_ADMIN";
+
   const { data: recordsRes, isLoading: srLoading } = useQuery<{ data: ServiceRecord[] }, Error>({
     queryKey: ["service-records", employeeId],
     queryFn: () => apiGet(`/service-records?employeeId=${employeeId}`),
   });
 
-  const columns = [
+  const handleDelete = async (recordId: string) => {
+    if (!confirm("Are you sure you want to delete this service record?")) return;
+    try {
+      await apiDelete(`/service-records/${recordId}`);
+      toast.success("Service record deleted");
+      queryClient.invalidateQueries({ queryKey: ["service-records", employeeId] });
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to delete record");
+    }
+  };
+
+  const columns: any[] = [
     { key: "dateFrom", header: "From", render: (r: Record<string, any>) => formatDate((r as ServiceRecord).dateFrom) },
     { key: "dateTo", header: "To", render: (r: Record<string, any>) => ( (r as ServiceRecord).dateTo ? formatDate((r as ServiceRecord).dateTo!) : "Present") },
     { key: "designation", header: "Position" },
     { key: "office", header: "Office" },
+    { key: "salary", header: "Salary", render: (r: any) => r.salary ? `₱${Number(r.salary).toLocaleString()}` : "-" },
     { key: "status", header: "Status" },
+    {
+      key: "actions",
+      header: "",
+      render: (r: any) => (
+        <div className="flex gap-1">
+          {canEdit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/service-records/${r.id}/edit?employeeId=${employeeId}`);
+              }}
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(r.id);
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5 text-[var(--destructive)]" />
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 
   if (srLoading) return <PageLoader />;
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Service Records</CardTitle>
+        {canEdit && (
+          <Button size="sm" onClick={() => navigate(`/service-records/new?employeeId=${employeeId}`)}>
+            Add Record
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <DataTable columns={columns as any} data={(recordsRes as any)?.data || []} />
