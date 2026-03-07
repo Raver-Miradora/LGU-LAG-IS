@@ -7,6 +7,7 @@ import employeeDocumentRouter from "./employee.document";
 import employeeIdCardRouter from "./employee.idcard";
 import employeePdsRouter from "./employee.pds";
 import employeeBatchIdRouter from "./employee.batchid";
+import employeeExportRouter from "./employee.export";
 
 const router = Router();
 
@@ -24,6 +25,9 @@ router.get(
   authorize("SUPER_ADMIN", "HR_ADMIN", "HR_STAFF", "PESO_ADMIN", "PESO_STAFF", "VIEWER"),
   employeeController.getDashboardStats
 );
+
+// Export must be mounted before /:id to avoid route conflict
+router.use(employeeExportRouter);
 
 router.get(
   "/:id",

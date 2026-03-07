@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, X, CreditCard } from "lucide-react";
+import { Plus, Search, Filter, X, CreditCard, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
@@ -122,6 +122,36 @@ export default function EmployeeListPage() {
     }
   };
 
+  const handleExport = (format: "xlsx" | "csv") => {
+    const params = new URLSearchParams();
+    params.set("format", format);
+    if (department) params.set("department", department);
+    if (status) params.set("status", status);
+    if (isActive) params.set("isActive", isActive);
+    const url = `${import.meta.env.VITE_API_URL ?? "http://localhost:5000/api"}/employees/export?${params.toString()}`;
+    // Use a hidden link with auth token
+    const link = document.createElement("a");
+    link.href = url;
+    // For authenticated download, use fetch + blob
+    fetch(url, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error("Export failed");
+        return r.blob();
+      })
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `employee-masterlist.${format}`;
+        a.click();
+        URL.revokeObjectURL(blobUrl);
+        toast.success(`Exported as ${format.toUpperCase()}`);
+      })
+      .catch(() => toast.error("Export failed"));
+  };
+
   const statusBadge = (s: string) => {
     const map: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
       PERMANENT: "success",
@@ -220,6 +250,12 @@ export default function EmployeeListPage() {
               {batchLoading ? "Generating..." : `Generate ${selectedIds.size} ID(s)`}
             </Button>
           )}
+          <Button variant="outline" onClick={() => handleExport("xlsx")}>
+            <Download className="mr-2 h-4 w-4" /> Excel
+          </Button>
+          <Button variant="outline" onClick={() => handleExport("csv")}>
+            <Download className="mr-2 h-4 w-4" /> CSV
+          </Button>
           <Button onClick={() => navigate("/employees/new")}>
             <Plus className="mr-2 h-4 w-4" /> Add Employee
           </Button>
