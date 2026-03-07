@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 interface Column<T> {
   key: string;
-  header: string;
+  header: string | (() => ReactNode);
   render?: (row: T) => ReactNode;
   className?: string;
 }
@@ -38,7 +38,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   col.className
                 )}
               >
-                {col.header}
+                {typeof col.header === "function" ? col.header() : col.header}
               </th>
             ))}
           </tr>

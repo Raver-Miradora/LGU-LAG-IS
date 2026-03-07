@@ -6,6 +6,7 @@ import { createEmployeeSchema, updateEmployeeSchema } from "./employee.schema";
 import employeeDocumentRouter from "./employee.document";
 import employeeIdCardRouter from "./employee.idcard";
 import employeePdsRouter from "./employee.pds";
+import employeeBatchIdRouter from "./employee.batchid";
 
 const router = Router();
 
@@ -56,4 +57,5 @@ router.patch(
 router.use(employeeDocumentRouter);
 router.use(employeeIdCardRouter);
 router.use(employeePdsRouter);
+router.use(employeeBatchIdRouter);
 export default router;

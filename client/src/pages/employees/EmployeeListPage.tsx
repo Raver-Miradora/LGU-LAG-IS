@@ -2,14 +2,15 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, X } from "lucide-react";
+import { Plus, Search, Filter, X, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Pagination } from "@/components/ui/Pagination";
 import { PageLoader } from "@/components/ui/Spinner";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
+import { toast } from "sonner";
 import type { Employee, PaginatedResponse } from "@/types";
 
 const departmentOptions = [
@@ -49,6 +50,8 @@ export default function EmployeeListPage() {
   const [status, setStatus] = useState("");
   const [isActive, setIsActive] = useState("true");
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchLoading, setBatchLoading] = useState(false);
 
   const { data, isLoading } = useQuery<PaginatedResponse<Employee>>({
     queryKey: ["employees", page, search, department, status, isActive],
@@ -73,6 +76,52 @@ export default function EmployeeListPage() {
     setPage(1);
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const rows = (data?.data ?? []) as Employee[];
+    if (rows.every((r) => selectedIds.has(r.id))) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(rows.map((r) => r.id)));
+    }
+  };
+
+  const handleBatchId = async () => {
+    if (selectedIds.size === 0) {
+      toast.error("Select at least one employee");
+      return;
+    }
+    setBatchLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:5000/api"}/employees/batch-idcard`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ employeeIds: Array.from(selectedIds) }),
+      });
+      if (!res.ok) throw new Error("Failed to generate batch IDs");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      toast.success(`Generated ${selectedIds.size} ID card(s)`);
+      setSelectedIds(new Set());
+    } catch {
+      toast.error("Failed to generate batch ID cards");
+    } finally {
+      setBatchLoading(false);
+    }
+  };
+
   const statusBadge = (s: string) => {
     const map: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
       PERMANENT: "success",
@@ -86,7 +135,30 @@ export default function EmployeeListPage() {
     return <Badge variant={map[s] ?? "secondary"}>{s.replace(/_/g, " ")}</Badge>;
   };
 
-  const columns: Array<{ key: string; header: string; render?: (row: Employee) => ReactNode; }> = [
+  const columns: Array<{ key: string; header: string | (() => ReactNode); render?: (row: Employee) => ReactNode; }> = [
+    {
+      key: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          checked={
+            (data?.data ?? []).length > 0 &&
+            (data?.data as Employee[] ?? []).every((r) => selectedIds.has(r.id))
+          }
+          onChange={toggleSelectAll}
+          className="h-4 w-4 rounded border-gray-300"
+        />
+      ),
+      render: (row: Employee) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(row.id)}
+          onChange={(e) => { e.stopPropagation(); toggleSelect(row.id); }}
+          onClick={(e) => e.stopPropagation()}
+          className="h-4 w-4 rounded border-gray-300"
+        />
+      ),
+    },
     {
       key: "employeeNo",
       header: "Employee No.",
@@ -137,9 +209,21 @@ export default function EmployeeListPage() {
             Manage employee profiles &middot; {data?.meta.total ?? 0} total
           </p>
         </div>
-        <Button onClick={() => navigate("/employees/new")}>
-          <Plus className="mr-2 h-4 w-4" /> Add Employee
-        </Button>
+        <div className="flex items-center gap-2">
+          {selectedIds.size > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleBatchId}
+              disabled={batchLoading}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              {batchLoading ? "Generating..." : `Generate ${selectedIds.size} ID(s)`}
+            </Button>
+          )}
+          <Button onClick={() => navigate("/employees/new")}>
+            <Plus className="mr-2 h-4 w-4" /> Add Employee
+          </Button>
+        </div>
       </div>
 
       {/* Search + Filter Toggle */}
