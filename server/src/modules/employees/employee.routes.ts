@@ -5,6 +5,7 @@ import { validate } from "../../middleware/validate";
 import { createEmployeeSchema, updateEmployeeSchema } from "./employee.schema";
 import employeeDocumentRouter from "./employee.document";
 import employeeIdCardRouter from "./employee.idcard";
+import employeePdsRouter from "./employee.pds";
 
 const router = Router();
 
@@ -54,4 +55,5 @@ router.patch(
 
 router.use(employeeDocumentRouter);
 router.use(employeeIdCardRouter);
+router.use(employeePdsRouter);
 export default router;

@@ -8,6 +8,7 @@ import {
   CreditCard,
   Archive,
   Trash2,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -71,6 +72,12 @@ export default function EmployeeViewPage() {
     openBlob(blob, `idcard-${employee.employeeNo}.pdf`);
   };
 
+  const handlePds = async () => {
+    if (!employee) return;
+    const blob = await apiGetBlob(`/employees/${employee.id}/pds`);
+    openBlob(blob, `pds-${employee.employeeNo}.pdf`);
+  };
+
   const handleArchive = async () => {
     setArchiving(true);
     try {
@@ -121,7 +128,10 @@ export default function EmployeeViewPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handlePdf}>
-            <FileText className="mr-1 h-4 w-4" /> PDF
+            <FileText className="mr-1 h-4 w-4" /> Service Record
+          </Button>
+          <Button variant="outline" size="sm" onClick={handlePds}>
+            <ClipboardList className="mr-1 h-4 w-4" /> PDS
           </Button>
           <Button variant="outline" size="sm" onClick={handleId}>
             <CreditCard className="mr-1 h-4 w-4" /> LGU ID
